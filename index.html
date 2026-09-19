@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#B3202A">
+<title>ThokMandi - B2B wholesale marketplace (MVP)</title>
+<!--
+  ThokMandi MVP  |  Single file: index.html  |  No CDN, no build step, no paid API.
+  Phone (Oppo F11, 4G) pe fast chalne ke liye: koi framework nahi, sirf HTML + CSS + vanilla JavaScript.
+  Data browser ke localStorage me save hota hai (demo). Real database (Supabase) baad ke phase me.
+
+  GitHub Pages: repo -> Add file -> index.html paste -> Commit -> Settings -> Pages -> Deploy from a branch (main / root).
+-->
+<style>
+:root{
+  --bg:#F4F6F3; --surface:#FFFFFF; --ink:#1A1D1C; --muted:#5B6560; --line:#DCE1DD;
+  --red:#B3202A; --green:#2E6B3F; --green-bg:#E4F1E7; --amber:#8A5A00; --amber-bg:#FFF1CF;
+  --bad:#A3161F; --bad-bg:#FBE4E4; --info:#1F4E8C; --info-bg:#E7EEF7;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Devanagari",sans-serif;font-size:16px;line-height:1.45;background:var(--bg);color:var(--ink);padding-bottom:92px;-webkit-tap-highlight-color:transparent}
+h1{font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.02em;margin:6px 0 4px}
+h2{font-size:17px;line-height:1.3;font-weight:700;margin:0 0 6px}
+h3{font-size:15px;font-weight:700;margin:0 0 4px}
+p{margin:0 0 8px}
+.sub{color:var(--muted);font-size:14px}
+.wrap{max-width:560px;margin:0 auto;padding:14px}
+:focus-visible{outline:3px solid #1A5FB4;outline-offset:2px}
+
+/* Top bar: gamosa-style woven strip is the one signature element */
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.strip{height:8px;background:repeating-linear-gradient(90deg,transparent 0 7px,rgba(255,255,255,.6) 7px 9px),var(--red)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:10px;padding-bottom:10px}
+.brand{font-size:20px;font-weight:800;letter-spacing:-.03em;color:var(--red)}
+.brand small{font-size:11px;font-weight:700;color:var(--muted);margin-left:6px;letter-spacing:0}
+.rolepill{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
+
+/* Buttons and fields */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.danger{color:var(--bad);border-color:#E5B8BB}
+.btn.sm{min-height:38px;padding:0 12px;font-size:14px}
+.btn.block{display:flex;width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.field{margin:10px 0}
+.field label,.lbl{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+input,select,textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid #B9C1BC;border-radius:8px;background:#fff;color:var(--ink);font-family:inherit;font-size:16px}
+textarea{min-height:88px;resize:vertical}
+.hint{font-size:12.5px;color:var(--muted);margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.row .btn{flex:1 1 auto}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.notice{border-radius:8px;padding:10px 12px;font-size:14px;margin:10px 0;background:var(--amber-bg);color:#5C3B00}
+.notice.bad{background:var(--bad-bg);color:#6E0F15}
+.notice.info{background:var(--info-bg);color:#173B69}
+.empty{text-align:center;padding:28px 12px}
+.empty .btn{margin-top:8px}
+
+/* Pills */
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EAEEEB;color:#3B4540;white-space:nowrap}
+.pill.ok{background:var(--green-bg);color:var(--green)}
+.pill.warn{background:var(--amber-bg);color:var(--amber)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.info{background:var(--info-bg);color:var(--info)}
+
+/* Market */
+.search{margin:10px 0 8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.rowbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 8px}
+.rowbar select{width:auto;min-height:38px;font-size:14px}
+.prow{display:grid;grid-template-columns:52px 1fr auto;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;font-family:inherit;color:inherit;cursor:pointer}
+.tile{width:52px;height:52px;border-radius:8px;background:#EDF1EE;display:grid;place-items:center;font-size:28px}
+.tile.big{width:60px;height:60px;font-size:32px;flex:0 0 auto}
+.pmain{display:flex;flex-direction:column;gap:3px;min-width:0}
+.pname{font-size:16px;font-weight:700;line-height:1.25}
+.pvendor{font-size:13px;color:var(--muted)}
+.ladder{font-size:12.5px;font-weight:600;color:var(--green)}
+.pprice{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.pprice b{font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.moq{font-weight:700;color:var(--red)}
+.phead{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 10px}
+.tbl td{padding:8px 0;border-bottom:1px solid var(--line)}
+.tbl td:last-child{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.stepper{display:grid;grid-template-columns:48px 1fr 48px;gap:8px}
+.stepper .btn{padding:0;font-size:20px}
+.stepper input{text-align:center;font-weight:700}
+.total{font-size:15px;margin:8px 0}
+.total b{font-size:18px;font-variant-numeric:tabular-nums}
+.err{color:var(--bad);font-size:13px;font-weight:600;margin-top:4px}
+
+/* Cart / orders */
+.group h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.line{padding:10px 0;border-top:1px solid var(--line)}
+.line .top2{display:flex;justify-content:space-between;gap:10px}
+.line .stepper{margin-top:8px;max-width:210px;grid-template-columns:40px 1fr 40px}
+.line .stepper .btn{min-height:40px}
+.line .stepper input{min-height:40px}
+.sum{display:flex;justify-content:space-between;font-size:14px;padding:2px 0;font-variant-numeric:tabular-nums}
+.sum.big{font-size:16px;font-weight:800;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.checkout{position:sticky;bottom:64px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+.checkout b{font-size:20px;font-variant-numeric:tabular-nums}
+.steps{display:flex;gap:4px;margin:10px 0 4px}
+.steps span{flex:1;height:5px;border-radius:3px;background:#DDE3DF}
+.steps span.done{background:var(--green)}
+.stlabels{display:flex;gap:4px;font-size:11.5px;color:var(--muted)}
+.stlabels span{flex:1;text-align:center}
+.stlabels span.cur{color:var(--ink);font-weight:700}
+.hist{font-size:12.5px;color:var(--muted);margin-top:8px}
+.oid{font-weight:800;font-size:16px}
+.items{margin:8px 0;font-size:14px}
+.items div{padding:2px 0}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;background:var(--surface);margin:12px 0}
+.stats div{padding:10px 8px;text-align:center}
+.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--muted)}
+
+/* AI tools */
+.log{list-style:none;padding:12px;background:#17201E;color:#D6E4DD;border-radius:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.log li{margin:0 0 8px}
+.log b{color:#fff}
+.log .ok{color:#7FD29A;margin-right:6px}
+.log small{display:block;color:#9FB3AA;margin-left:18px;font-size:12px}
+.verdict{border-left:4px solid var(--red);padding:6px 12px;margin:8px 0 12px;background:#FBF3F3;border-radius:0 8px 8px 0}
+.verdict p{margin:2px 0;font-size:15px}
+pre{white-space:pre-wrap;word-break:break-word;background:#F0F3F1;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;max-height:260px;overflow:auto;margin-bottom:6px}
+
+/* Bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding-bottom:env(safe-area-inset-bottom)}
+.nav[hidden]{display:none}
+.nav button{position:relative;background:none;border:0;min-height:58px;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.nav button.on{color:var(--red)}
+.nav button.on::before{content:"";position:absolute;top:0;left:24%;right:24%;height:3px;background:var(--red);border-radius:0 0 3px 3px}
+.nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cnt{position:absolute;top:4px;left:calc(50% + 6px);background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:grid;place-items:center;padding:0 4px}
+
+/* Bottom sheet + toast */
+.sheetwrap{position:fixed;inset:0;z-index:50;background:rgba(20,25,23,.5);display:none;align-items:flex-end;justify-content:center}
+.sheetwrap.open{display:flex}
+.sheet{background:var(--surface);width:100%;max-width:560px;max-height:90vh;overflow:auto;border-radius:16px 16px 0 0;padding:0 16px 22px;animation:up .2s ease-out}
+.shead{position:sticky;top:0;background:var(--surface);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0 8px;z-index:2}
+.shead h2{margin:0}
+.x{width:40px;height:40px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:20px;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;font-size:14px;z-index:60;max-width:90%;display:none;text-align:center}
+.toast.show{display:block}
+@keyframes up{from{transform:translateY(20px);opacity:.6}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="strip" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="brand">ThokMandi<small>MVP</small></span>
+    <span id="role"></span>
+  </div>
+</header>
+
+<main id="app" class="wrap"><noscript>Please turn on JavaScript to use this app.</noscript></main>
+
+<nav id="nav" class="nav" aria-label="Main" hidden></nav>
+
+<div id="sheetwrap" class="sheetwrap" data-act="backdrop">
+  <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="shead"><h2 id="sheet-title"></h2><button id="sheet-close" class="x" data-act="close-sheet" aria-label="Close">&times;</button></div>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<input type="file" id="importfile" accept="application/json" hidden>
+
+<script>
+'use strict';
+/* =====================================================================
+   1. CONFIG - yahin se brand, categories, GST rates badal sakte hain
+   ===================================================================== */
+const BRAND = 'ThokMandi';                 // placeholder name, apna brand yahan likhein
+const DB_KEY = 'thokmandi_db_v2';
+const DB_VERSION = 2;
+const CATEGORIES = ['Tea & Beverages','Grains & Staples','Spices','Handicrafts','Textiles','Electronics'];
+const UNITS = ['kg','L','pc','set','box'];
+const GST_RATES = [0,5,12,18,28];          // sample slabs; real rate product ke HSN ke hisab se CA se confirm karein
+const FLOW = ['Placed','Confirmed','Shipped','Delivered'];
+const NEXT = { Placed:['Confirmed','Confirm order'], Confirmed:['Shipped','Mark shipped'], Shipped:['Delivered','Mark delivered'] };
+const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+const STATE_CODES = {'01':'Jammu & Kashmir','02':'Himachal Pradesh','03':'Punjab','04':'Chandigarh','05':'Uttarakhand','06':'Haryana','07':'Delhi','08':'Rajasthan','09':'Uttar Pradesh','10':'Bihar','11':'Sikkim','12':'Arunachal Pradesh','13':'Nagaland','14':'Manipur','15':'Mizoram','16':'Tripura','17':'Meghalaya','18':'Assam','19':'West Bengal','20':'Jharkhand','21':'Odisha','22':'Chhattisgarh','23':'Madhya Pradesh','24':'Gujarat','26':'Dadra & Nagar Haveli and Daman & Diu','27':'Maharashtra','29':'Karnataka','30':'Goa','31':'Lakshadweep','32':'Kerala','33':'Tamil Nadu','34':'Puducherry','35':'Andaman & Nicobar','36':'Telangana','37':'Andhra Pradesh','38':'Ladakh'};
+
+const ICONS = {
+  store:'<path d="M4 9v11h16V9M3 9l2-5h14l2 5H3zM9 20v-6h6v6"/>',
+  cart:'<path d="M3 4h2l2 11h11l2-8H6"/><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/>',
+  orders:'<path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h4"/>',
+  ai:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>'
+};
+const TABS = {
+  buyer:[{id:'market',label:'Market',icon:'store'},{id:'cart',label:'Cart',icon:'cart'},{id:'orders',label:'Orders',icon:'orders'},{id:'ai',label:'AI tools',icon:'ai'},{id:'me',label:'Profile',icon:'user'}],
+  vendor:[{id:'products',label:'Listings',icon:'box'},{id:'orders',label:'Orders',icon:'orders'},{id:'ai',label:'AI tools',icon:'ai'},{id:'me',label:'Profile',icon:'user'}],
+  admin:[{id:'verify',label:'Verify',icon:'shield'},{id:'orders',label:'Orders',icon:'orders'},{id:'ai',label:'AI tools',icon:'ai'},{id:'me',label:'Profile',icon:'user'}]
+};
+
+/* =====================================================================
+   2. SMALL HELPERS
+   ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2 = n => Math.round(n * 100) / 100;
+const inr = n => '\u20B9' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const fmtDate = t => new Date(t).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'numeric', minute:'2-digit' });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const roleLabel = r => ({ buyer:'Buyer', vendor:'Vendor', admin:'Admin' }[r] || r);
+const svg = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* =====================================================================
+   3. DATABASE (localStorage) + SEED DATA
+   Sab sample vendors/GSTIN/phone FAKE hain. Phone khaali hai, isliye WhatsApp
+   link contact chunne wala screen kholta hai (kisi random number par nahi jata).
+   ===================================================================== */
+let db = loadDB();
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) { const d = JSON.parse(raw); if (d && d.v === DB_VERSION) return d; }
+  } catch (e) { /* private mode etc. */ }
+  return seed();
+}
+function save() {
+  try { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+  catch (e) { console.warn('Storage unavailable', e); }
+}
+function seed() {
+  const u = (id, role, name, business, city, gstin, status, note) =>
+    ({ id, role, name, business, phone:'', city, gstin:gstin || '', gstinStatus:status || 'none', gstinNote:note || '' });
+  const users = [
+    u('u_admin','admin','Platform Admin','ThokMandi Ops','Guwahati'),
+    u('u_buyer','buyer','Ravi Das','Ravi General Store','Biswanath Chariali'),
+    u('v_tea','vendor','Anup Bora','Brahmaputra Tea Co.','Dibrugarh','18ABCDE1234F1Z5','verified'),
+    u('v_karbi','vendor','Mina Ronghang','Karbi Hills Farmers Collective','Diphu','18AAACK1234H1Z2','pending'),
+    u('v_loom','vendor','Jonali Kalita','Assam Craft & Handloom Cluster','Sualkuchi','18AAAFS4321L1Z6','verified'),
+    u('v_surat','vendor','Kirit Shah','Surat Textiles Hub','Surat','24AABCS5678M1Z9','verified'),
+    u('v_gadget','vendor','Neeraj Arora','Metro Gadgets Wholesale','New Delhi','07AAKCN9012P1ZB','rejected','Business name does not match the GST portal record.')
+  ];
+  const specs = [
+    ['v_tea','Assam CTC Tea (dust grade)','Tea & Beverages','\uD83C\uDF75','kg',310,50,2000,5,[[200,295],[500,280]],'Dibrugarh, Assam','Strong, fast-brewing CTC leaf. Packed in 50 kg lined sacks.'],
+    ['v_tea','Orthodox Green Tea','Tea & Beverages','\uD83C\uDF43','kg',620,25,400,5,[[100,590]],'Dibrugarh, Assam','Whole-leaf orthodox green tea in 25 kg cartons.'],
+    ['v_karbi','Karbi Turmeric Powder','Spices','\uD83C\uDF3F','kg',165,25,800,5,[[100,150],[300,138]],'Diphu, Karbi Anglong','Sun-dried and stone-ground turmeric from Karbi hill farms.'],
+    ['v_karbi','Dry Ginger (sonth)','Spices','\uD83C\uDF3F','kg',210,50,600,5,[[200,195]],'Diphu, Karbi Anglong','Whole dried ginger, sorted and bagged in 25 kg sacks.'],
+    ['v_karbi','Joha Rice (aromatic)','Grains & Staples','\uD83C\uDF3E','kg',135,100,3000,5,[[500,124],[1000,118]],'Nagaon, Assam','Traditional aromatic Assam rice in 25 kg bags.'],
+    ['v_karbi','Kachi Ghani Mustard Oil','Grains & Staples','\uD83D\uDEE2\uFE0F','L',165,100,1500,5,[[500,155]],'Nagaon, Assam','Cold-pressed mustard oil in 15 L tins.'],
+    ['v_loom','Handwoven Cotton Gamosa','Handicrafts','\uD83E\uDDE3','pc',120,100,1200,5,[[500,108]],'Sualkuchi, Assam','Traditional white gamosa with a red woven border.'],
+    ['v_loom','Bamboo Storage Baskets (set of 3)','Handicrafts','\uD83E\uDDFA','set',280,50,300,12,[[200,255]],'Guwahati, Assam','Hand-woven bamboo baskets with a food-safe finish.'],
+    ['v_surat','Cotton Fleece Hoodies','Textiles','\uD83E\uDDE5','pc',340,100,2500,12,[[500,315],[1000,295]],'Surat, Gujarat','320 GSM fleece hoodies, assorted sizes M to XXL.'],
+    ['v_gadget','TWS Earbuds v5.3','Electronics','\uD83C\uDFA7','pc',290,200,5000,18,[[1000,265]],'New Delhi','Bluetooth 5.3 earbuds with charging case, retail boxed.']
+  ];
+  const products = specs.map((s, i) => ({
+    id:'p' + (101 + i), vendorId:s[0], name:s[1], category:s[2], emoji:s[3], unit:s[4],
+    price:s[5], moq:s[6], stock:s[7], gst:s[8], tiers:s[9].map(t => ({ min:t[0], price:t[1] })),
+    origin:s[10], desc:s[11]
+  }));
+  return { v:DB_VERSION, users, products, orders:[], carts:{}, session:null, seq:{ p:200, o:1000, u:10 } };
+}
+
+/* Getters */
+const U = id => db.users.find(x => x.id === id);
+const P = id => db.products.find(x => x.id === id);
+const me = () => (db.session ? U(db.session) : null);
+
+/* =====================================================================
+   4. BUSINESS LOGIC (pricing, GST, cart, orders, WhatsApp)
+   ===================================================================== */
+function unitPrice(p, qty) {                // bulk tier pricing
+  let price = p.price;
+  [...p.tiers].sort((a, b) => a.min - b.min).forEach(t => { if (qty >= t.min) price = t.price; });
+  return price;
+}
+const stepFor = p => Math.max(1, Math.round(p.moq / 10));
+const stateOf = u => (u && GSTIN_RE.test(u.gstin || '') ? u.gstin.slice(0, 2) : null);
+function taxType(buyer, vendor) {           // same state = CGST+SGST, different = IGST
+  const a = stateOf(buyer), b = stateOf(vendor);
+  return a && b ? (a === b ? 'CGST + SGST' : 'IGST') : 'GST';
+}
+function gstinBadge(u) {
+  return ({ verified:'<span class="pill ok">GSTIN verified</span>', pending:'<span class="pill warn">GSTIN pending</span>', rejected:'<span class="pill bad">GSTIN rejected</span>' }[u.gstinStatus]) || '<span class="pill">No GSTIN</span>';
+}
+function waLink(phone, text) {
+  const d = String(phone || '').replace(/\D/g, '');
+  const num = d.length === 10 ? '91' + d : d;
+  return 'https://wa.me/' + num + '?text=' + encodeURIComponent(text);
+}
+
+/* Cart */
+const cart = () => db.carts[db.session] || (db.carts[db.session] = []);
+function cartLines() {
+  return cart().map(l => {
+    const p = P(l.productId); if (!p) return null;
+    const price = unitPrice(p, l.qty), errs = [];
+    if (l.qty < p.moq) errs.push('Minimum order is ' + p.moq + ' ' + p.unit);
+    if (l.qty > p.stock) errs.push('Only ' + p.stock + ' ' + p.unit + ' in stock');
+    return { productId:l.productId, qty:l.qty, p, price, line:r2(price * l.qty), errs };
+  }).filter(Boolean);
+}
+function groupTotals(lines, buyer, vendor) {
+  const subtotal = r2(lines.reduce((s, l) => s + l.price * l.qty, 0));
+  const gst = r2(lines.reduce((s, l) => s + l.price * l.qty * l.p.gst / 100, 0));
+  return { subtotal, gst, total:r2(subtotal + gst), taxType:taxType(buyer, vendor) };
+}
+function addToCart(productId, qty) {
+  const p = P(productId), c = cart();
+  const ex = c.find(l => l.productId === productId);
+  const next = (ex ? ex.qty : 0) + qty;
+  if (qty < p.moq && !ex) return toast('Minimum order is ' + p.moq + ' ' + p.unit);
+  if (next > p.stock) return toast('Only ' + p.stock + ' ' + p.unit + ' in stock');
+  if (ex) ex.qty = next; else c.push({ productId, qty });
+  save(); closeSheet(); render(); toast('Added to cart');
+}
+
+/* Orders: ek vendor = ek order. Price + GST rate order me snapshot ho jata hai. */
+function placeOrders() {
+  const lines = cartLines();
+  if (!lines.length) return toast('Your cart is empty');
+  if (lines.some(l => l.errs.length)) return toast('Fix the quantities marked in red first');
+  const buyer = me(), byVendor = {};
+  lines.forEach(l => (byVendor[l.p.vendorId] = byVendor[l.p.vendorId] || []).push(l));
+  const created = [];
+  Object.keys(byVendor).forEach(vid => {
+    const g = byVendor[vid], t = groupTotals(g, buyer, U(vid));
+    const o = {
+      id:'ORD-' + (++db.seq.o), buyerId:buyer.id, vendorId:vid,
+      items:g.map(l => ({ productId:l.p.id, name:l.p.name, unit:l.p.unit, qty:l.qty, price:l.price, gst:l.p.gst })),
+      subtotal:t.subtotal, gst:t.gst, total:t.total, taxType:t.taxType,
+      status:'Placed', history:[{ status:'Placed', at:Date.now() }], createdAt:Date.now()
+    };
+    g.forEach(l => { l.p.stock -= l.qty; });
+    db.orders.unshift(o); created.push(o);
+  });
+  db.carts[db.session] = [];
+  save(); render();
+  openSheet('Order placed', `
+    <p>${created.length > 1 ? 'Your cart was split into ' + created.length + ' orders, one per seller.' : 'Your order has been sent to the seller.'}</p>
+    ${created.map(o => `<div class="panel"><div class="oid">${o.id}</div><div class="sub">${esc(U(o.vendorId).business)} - ${inr(o.total)}</div>
+      <button class="btn dark block" style="margin-top:10px" data-act="order-wa" data-id="${o.id}">Confirm ${o.id} on WhatsApp</button></div>`).join('')}
+    <button class="btn block" data-act="goto-orders">View my orders</button>`);
+}
+function setStatus(id, status) {
+  const o = db.orders.find(x => x.id === id); if (!o) return;
+  if (status === 'Cancelled' && o.status !== 'Cancelled') o.items.forEach(i => { const p = P(i.productId); if (p) p.stock += i.qty; });
+  o.status = status; o.history.push({ status, at:Date.now() });
+  save(); render(); toast('Order ' + id + ': ' + status);
+}
+function orderMsg(o) {
+  const b = U(o.buyerId), v = U(o.vendorId);
+  const lines = o.items.map((i, n) => `${n + 1}. ${i.name} - ${i.qty} ${i.unit} x ${inr(i.price)} = ${inr(i.qty * i.price)}`).join('\n');
+  return `Hello ${v.business}, this is ${b.business || b.name}.\nOrder ${o.id} on ${BRAND}\n${lines}\nSubtotal: ${inr(o.subtotal)}\nGST (${o.taxType}): ${inr(o.gst)}\nTotal: ${inr(o.total)}\nDeliver to: ${b.city || '-'}\nPlease confirm availability and dispatch date.`;
+}
+
+/* =====================================================================
+   5. UI STATE + RENDER
+   ===================================================================== */
+const ui = { tab:'market', q:'', cat:'All', sort:'rel', ofilter:'All', aiWf:'rfq', aiInputs:{}, aiOut:null, aiBusy:false };
+
+function render() {
+  const u = me();
+  $('#role').innerHTML = u ? `<span class="rolepill">${roleLabel(u.role)}</span>` : '';
+  const nav = $('#nav');
+  if (!u) { nav.hidden = true; $('#app').innerHTML = welcomeHTML(); return; }
+  const tabs = TABS[u.role];
+  if (!tabs.some(t => t.id === ui.tab)) ui.tab = tabs[0].id;
+  const n = u.role === 'buyer' ? cart().length : 0;
+  nav.hidden = false;
+  nav.innerHTML = tabs.map(t => `<button class="${ui.tab === t.id ? 'on' : ''}" data-act="tab" data-tab="${t.id}" ${ui.tab === t.id ? 'aria-current="page"' : ''}>${svg(t.icon)}<span>${t.label}</span>${t.id === 'cart' && n ? `<span class="cnt">${n}</span>` : ''}</button>`).join('');
+  const views = { market:marketHTML, cart:cartHTML, orders:ordersHTML, ai:aiHTML, me:profileHTML, products:productsHTML, verify:verifyHTML };
+  $('#app').innerHTML = (views[ui.tab] || marketHTML)(u);
+}
+
+/* ---------- Welcome / sign in ---------- */
+function welcomeHTML() {
+  return `
+  <h1>Wholesale, straight from the source</h1>
+  <p class="sub">Buy and sell in bulk from your phone. Tier prices, minimum order quantities, GST bills and WhatsApp order confirmation.</p>
+  <div class="panel">
+    <h2>Try a demo account</h2>
+    <p class="sub">No password yet. Real login comes in the authentication phase.</p>
+    <div class="row">
+      <button class="btn primary" data-act="demo" data-id="u_buyer">Buyer</button>
+      <button class="btn dark" data-act="demo" data-id="v_tea">Vendor</button>
+      <button class="btn" data-act="demo" data-id="u_admin">Admin</button>
+    </div>
+  </div>
+  <form class="panel" data-form="register">
+    <h2>Create your account</h2>
+    <div class="field"><span class="lbl">I want to</span>
+      <select name="role"><option value="buyer">Buy wholesale (buyer)</option><option value="vendor">Sell wholesale (vendor)</option></select></div>
+    <div class="field"><label for="r-name">Your name</label><input id="r-name" name="name" autocomplete="name" required></div>
+    <div class="field"><label for="r-biz">Business name</label><input id="r-biz" name="business" autocomplete="organization" required></div>
+    <div class="g2">
+      <div class="field"><label for="r-phone">WhatsApp number</label><input id="r-phone" name="phone" type="tel" inputmode="tel" placeholder="10 digits" autocomplete="tel"></div>
+      <div class="field"><label for="r-city">City</label><input id="r-city" name="city" autocomplete="address-level2"></div>
+    </div>
+    <div class="field"><label for="r-gst">GSTIN (optional)</label><input id="r-gst" name="gstin" maxlength="15" autocapitalize="characters" placeholder="15 characters"><div class="hint">Admin checks it manually before it shows as verified.</div></div>
+    <button class="btn primary block">Create account</button>
+  </form>`;
+}
+
+/* ---------- Buyer: market ---------- */
+function marketHTML() {
+  const chips = ['All', ...CATEGORIES].map(c => `<button class="chip${ui.cat === c ? ' on' : ''}" data-act="cat" data-v="${esc(c)}">${esc(c)}</button>`).join('');
+  return `
+  <h1>Wholesale market</h1>
+  <p class="sub">Price drops as you order more. Every listing has a minimum order quantity (MOQ).</p>
+  <div class="search"><input id="q" type="search" placeholder="Search tea, rice, hoodies" value="${esc(ui.q)}" aria-label="Search products"></div>
+  <div class="chips" role="group" aria-label="Categories">${chips}</div>
+  <div id="plist">${productListHTML()}</div>`;
+}
+function productListHTML() {
+  const q = ui.q.trim().toLowerCase();
+  let list = db.products.filter(p => {
+    if (ui.cat !== 'All' && p.category !== ui.cat) return false;
+    if (!q) return true;
+    return [p.name, p.category, p.desc, p.origin, (U(p.vendorId) || {}).business].join(' ').toLowerCase().includes(q);
+  });
+  if (ui.sort === 'price') list.sort((a, b) => a.price - b.price);
+  if (ui.sort === 'moq') list.sort((a, b) => a.moq - b.moq);
+  const bar = `<div class="rowbar"><span class="sub">${list.length} product${list.length === 1 ? '' : 's'}</span>
+    <select id="sort" aria-label="Sort products"><option value="rel"${ui.sort === 'rel' ? ' selected' : ''}>Sort: featured</option><option value="price"${ui.sort === 'price' ? ' selected' : ''}>Price: low to high</option><option value="moq"${ui.sort === 'moq' ? ' selected' : ''}>MOQ: low to high</option></select></div>`;
+  if (!list.length) return bar + `<div class="empty"><p>No products match your search.</p><p class="sub">Try a shorter word like "tea" or pick All categories.</p></div>`;
+  return bar + list.map(prowHTML).join('');
+}
+function prowHTML(p) {
+  const v = U(p.vendorId) || {};
+  const best = p.tiers.length ? [...p.tiers].sort((a, b) => b.min - a.min)[0] : null;
+  return `<button class="prow" data-act="open-product" data-id="${p.id}">
+    <span class="tile" aria-hidden="true">${p.emoji}</span>
+    <span class="pmain"><span class="pname">${esc(p.name)}</span>
+      <span class="pvendor">${esc(v.business)}${v.gstinStatus === 'verified' ? ' &#10003;' : ''}</span>
+      ${best ? `<span class="ladder">${best.min}+ ${esc(p.unit)}: ${inr(best.price)}/${esc(p.unit)}</span>` : ''}</span>
+    <span class="pprice"><b>${inr(p.price)}</b><span>per ${esc(p.unit)}</span><span class="moq">MOQ ${p.moq} ${esc(p.unit)}</span>${p.stock <= 0 ? '<span class="pill bad">Out of stock</span>' : ''}</span>
+  </button>`;
+}
+function openProduct(id) {
+  const p = P(id), u = me(); if (!p) return;
+  const v = U(p.vendorId) || {};
+  const tiers = [{ min:p.moq, price:p.price }, ...p.tiers].sort((a, b) => a.min - b.min);
+  const rows = tiers.map((t, i) => { const n = tiers[i + 1]; return `<tr><td>${n ? t.min + ' to ' + (n.min - 1) : t.min + ' and above'} ${esc(p.unit)}</td><td>${inr(t.price)} / ${esc(p.unit)}</td></tr>`; }).join('');
+  const canBuy = u.role === 'buyer' && p.stock > 0;
+  openSheet(p.name, `
+    <div class="phead"><span class="tile big" aria-hidden="true">${p.emoji}</span>
+      <div><div class="sub">${esc(v.business)}</div><div style="margin:3px 0">${gstinBadge(v)}</div><div class="sub">${esc(p.origin)}</div></div></div>
+    <p>${esc(p.desc)}</p>
+    <table class="tbl" aria-label="Price by quantity"><tbody>${rows}</tbody></table>
+    <div class="sub">In stock: ${p.stock} ${esc(p.unit)}. GST: ${p.gst}%.</div>
+    ${canBuy ? `
+      <div class="field"><label for="dqty">Quantity (${esc(p.unit)})</label>
+        <div class="stepper"><button type="button" class="btn" data-act="dstep" data-d="-1" aria-label="Decrease quantity">&minus;</button>
+        <input id="dqty" type="number" inputmode="numeric" min="${p.moq}" max="${p.stock}" value="${p.moq}" data-pid="${p.id}">
+        <button type="button" class="btn" data-act="dstep" data-d="1" aria-label="Increase quantity">+</button></div>
+        <div id="dtotal" class="total"></div></div>
+      <button class="btn primary block" data-act="add-cart" data-id="${p.id}">Add to cart</button>
+      <button class="btn block" style="margin-top:8px" data-act="rfq-wa" data-id="${p.id}">Ask for a quote on WhatsApp</button>`
+    : (p.stock <= 0 ? '<div class="notice bad">This product is out of stock.</div>' : '')}`);
+  updateDTotal();
+}
+function updateDTotal() {
+  const inp = $('#dqty'), out = $('#dtotal'); if (!inp || !out) return;
+  const p = P(inp.dataset.pid), qty = Math.floor(Number(inp.value));
+  if (!(qty >= p.moq)) { out.innerHTML = `<span class="err">Minimum order is ${p.moq} ${esc(p.unit)}</span>`; return; }
+  if (qty > p.stock) { out.innerHTML = `<span class="err">Only ${p.stock} ${esc(p.unit)} in stock</span>`; return; }
+  const price = unitPrice(p, qty);
+  out.innerHTML = `${qty} x ${inr(price)} = <b>${inr(price * qty)}</b> <span class="sub">+ ${p.gst}% GST</span>`;
+}
+
+/* ---------- Buyer: cart ---------- */
+function cartHTML(u) {
+  const lines = cartLines();
+  if (!lines.length) return `<h1>Cart</h1><div class="empty"><p>Your cart is empty.</p><p class="sub">Open a product, enter a quantity at or above the MOQ and tap Add to cart.</p><button class="btn primary" data-act="tab" data-tab="market">Browse products</button></div>`;
+  const byVendor = {};
+  lines.forEach(l => (byVendor[l.p.vendorId] = byVendor[l.p.vendorId] || []).push(l));
+  let grand = 0;
+  const groups = Object.keys(byVendor).map(vid => {
+    const v = U(vid), g = byVendor[vid], t = groupTotals(g, u, v); grand += t.total;
+    return `<section class="panel group"><h3>${esc(v.business)} ${gstinBadge(v)}</h3>
+      ${g.map(l => `<div class="line"><div class="top2"><div><b>${esc(l.p.name)}</b><div class="sub">${inr(l.price)} per ${esc(l.p.unit)} - MOQ ${l.p.moq}</div></div><b>${inr(l.line)}</b></div>
+        <div class="stepper"><button class="btn" data-act="cart-step" data-pid="${l.p.id}" data-d="-1" aria-label="Decrease quantity of ${esc(l.p.name)}">&minus;</button>
+        <input type="number" inputmode="numeric" data-cartqty="${l.p.id}" value="${l.qty}" aria-label="Quantity of ${esc(l.p.name)}">
+        <button class="btn" data-act="cart-step" data-pid="${l.p.id}" data-d="1" aria-label="Increase quantity of ${esc(l.p.name)}">+</button></div>
+        ${l.errs.map(e => `<div class="err">${esc(e)}</div>`).join('')}
+        <button class="btn sm" style="margin-top:8px" data-act="cart-remove" data-pid="${l.p.id}">Remove</button></div>`).join('')}
+      <div class="sum"><span>Subtotal</span><span>${inr(t.subtotal)}</span></div>
+      <div class="sum"><span>GST (${t.taxType})</span><span>${inr(t.gst)}</span></div>
+      <div class="sum big"><span>Seller total</span><span>${inr(t.total)}</span></div></section>`;
+  }).join('');
+  const valid = lines.every(l => !l.errs.length);
+  return `<h1>Cart</h1>${groups}
+    ${valid ? '' : '<div class="notice bad">Some quantities are below the MOQ or above stock. Fix them to continue.</div>'}
+    <div class="checkout"><div><div class="sub">Total</div><b>${inr(r2(grand))}</b></div><button class="btn primary" data-act="place-order" ${valid ? '' : 'disabled'}>Place order</button></div>`;
+}
+
+/* ---------- Orders (buyer / vendor / admin) ---------- */
+function ordersHTML(u) {
+  let list = db.orders.filter(o => u.role === 'admin' || (u.role === 'buyer' ? o.buyerId === u.id : o.vendorId === u.id));
+  const filters = ['All', ...FLOW, 'Cancelled'];
+  const chips = filters.map(f => `<button class="chip${ui.ofilter === f ? ' on' : ''}" data-act="ofilter" data-v="${f}">${f}</button>`).join('');
+  if (ui.ofilter !== 'All') list = list.filter(o => o.status === ui.ofilter);
+  const body = list.length ? list.map(o => orderCard(o, u)).join('')
+    : `<div class="empty"><p>No orders here yet.</p>${u.role === 'buyer' ? '<button class="btn primary" data-act="tab" data-tab="market">Find products</button>' : '<p class="sub">Orders from buyers will show up here.</p>'}</div>`;
+  return `<h1>${u.role === 'buyer' ? 'My orders' : u.role === 'vendor' ? 'Incoming orders' : 'All orders'}</h1><div class="chips">${chips}</div>${body}`;
+}
+function orderCard(o, u) {
+  const b = U(o.buyerId), v = U(o.vendorId);
+  const who = u.role === 'buyer' ? 'Seller: ' + esc(v.business)
+    : u.role === 'vendor' ? 'Buyer: ' + esc(b.business || b.name) + (b.city ? ' (' + esc(b.city) + ')' : '')
+    : esc(b.business || b.name) + ' to ' + esc(v.business);
+  const idx = FLOW.indexOf(o.status);
+  const bar = o.status === 'Cancelled' ? '<span class="pill bad">Cancelled</span>'
+    : `<div class="steps" aria-hidden="true">${FLOW.map((s, i) => `<span class="${i <= idx ? 'done' : ''}"></span>`).join('')}</div><div class="stlabels">${FLOW.map((s, i) => `<span class="${i === idx ? 'cur' : ''}">${s}</span>`).join('')}</div>`;
+  let actions = '';
+  if (u.role === 'buyer') {
+    actions = `<button class="btn sm" data-act="order-wa" data-id="${o.id}">WhatsApp seller</button>` + (o.status === 'Placed' ? `<button class="btn sm danger" data-act="order-status" data-id="${o.id}" data-s="Cancelled">Cancel order</button>` : '');
+  } else if (u.role === 'vendor') {
+    const n = NEXT[o.status];
+    actions = (n ? `<button class="btn sm primary" data-act="order-status" data-id="${o.id}" data-s="${n[0]}">${n[1]}</button>` : '')
+      + `<button class="btn sm" data-act="order-wa" data-id="${o.id}">WhatsApp buyer</button>`
+      + (o.status === 'Placed' || o.status === 'Confirmed' ? `<button class="btn sm danger" data-act="order-status" data-id="${o.id}" data-s="Cancelled">Cancel</button>` : '');
+  }
+  return `<article class="panel"><div style="display:flex;justify-content:space-between;gap:8px"><span class="oid">${o.id}</span><span class="sub">${fmtDate(o.createdAt)}</span></div>
+    <div class="sub">${who}</div>${bar}
+    <div class="items">${o.items.map(i => `<div>${esc(i.name)} - ${i.qty} ${esc(i.unit)} x ${inr(i.price)}</div>`).join('')}</div>
+    <div class="sum"><span>Subtotal</span><span>${inr(o.subtotal)}</span></div>
+    <div class="sum"><span>GST (${o.taxType})</span><span>${inr(o.gst)}</span></div>
+    <div class="sum big"><span>Total</span><span>${inr(o.total)}</span></div>
+    <div class="hist">${o.history.map(h => esc(h.status) + ' - ' + fmtDate(h.at)).join('<br>')}</div>
+    ${actions ? `<div class="row">${actions}</div>` : ''}</article>`;
+}
+
+/* ---------- Vendor: listings (product CRUD) ---------- */
+function productsHTML(u) {
+  const mine = db.products.filter(p => p.vendorId === u.id);
+  const open = db.orders.filter(o => o.vendorId === u.id && (o.status === 'Placed' || o.status === 'Confirmed' || o.status === 'Shipped')).length;
+  const rev = r2(db.orders.filter(o => o.vendorId === u.id && o.status === 'Delivered').reduce((s, o) => s + o.total, 0));
+  const gnote = u.gstinStatus === 'verified' ? '' : u.gstinStatus === 'rejected'
+    ? `<div class="notice bad">Your GSTIN was rejected: ${esc(u.gstinNote || 'no reason given')}. Update it in Profile.</div>`
+    : `<div class="notice">${u.gstinStatus === 'pending' ? 'Your GSTIN is waiting for admin review.' : 'Add your GSTIN in Profile.'} Buyers trust verified sellers more.</div>`;
+  return `<h1>Your listings</h1>
+    <div class="stats"><div><b>${mine.length}</b><span>Listings</span></div><div><b>${open}</b><span>Open orders</span></div><div><b>${inr(rev)}</b><span>Delivered</span></div></div>
+    ${gnote}
+    <button class="btn primary block" data-act="new-product">Add a product</button>
+    <div style="height:12px"></div>
+    ${mine.length ? mine.map(p => `<article class="panel"><div class="phead" style="margin:0"><span class="tile" aria-hidden="true">${p.emoji}</span><div><b>${esc(p.name)}</b>
+      <div class="sub">${inr(p.price)} per ${esc(p.unit)} - MOQ ${p.moq} - Stock ${p.stock}</div></div></div>
+      <div class="row"><button class="btn sm" data-act="edit-product" data-id="${p.id}">Edit</button><button class="btn sm danger" data-act="delete-product" data-id="${p.id}">Delete</button></div></article>`).join('')
+    : '<div class="empty"><p>No listings yet.</p><p class="sub">Add your first product with a price, MOQ and stock.</p></div>'}`;
+}
+function productFormHTML(p) {
+  p = p || { id:'', name:'', category:CATEGORIES[0], emoji:'\uD83D\uDCE6', unit:'kg', price:'', moq:'', stock:'', gst:5, tiers:[], origin:'', desc:'' };
+  const t1 = p.tiers[0] || {}, t2 = p.tiers[1] || {};
+  const opts = (arr, sel) => arr.map(x => `<option value="${esc(x)}"${String(x) === String(sel) ? ' selected' : ''}>${esc(x)}</option>`).join('');
+  return `<form data-form="product"><input type="hidden" name="id" value="${esc(p.id)}">
+    <div class="field"><label for="f-name">Product name</label><input id="f-name" name="name" value="${esc(p.name)}" required></div>
+    <div class="g2"><div class="field"><label for="f-cat">Category</label><select id="f-cat" name="category">${opts(CATEGORIES, p.category)}</select></div>
+      <div class="field"><label for="f-unit">Selling unit</label><select id="f-unit" name="unit">${opts(UNITS, p.unit)}</select></div></div>
+    <div class="g2"><div class="field"><label for="f-price">Price per unit (INR)</label><input id="f-price" name="price" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(p.price)}" required></div>
+      <div class="field"><label for="f-gst">GST rate (%)</label><select id="f-gst" name="gst">${opts(GST_RATES, p.gst)}</select></div></div>
+    <div class="g2"><div class="field"><label for="f-moq">Minimum order (MOQ)</label><input id="f-moq" name="moq" type="number" inputmode="numeric" min="1" value="${esc(p.moq)}" required></div>
+      <div class="field"><label for="f-stock">Stock available</label><input id="f-stock" name="stock" type="number" inputmode="numeric" min="0" value="${esc(p.stock)}" required></div></div>
+    <div class="lbl">Bulk price tiers (optional)</div>
+    <div class="g2"><div class="field"><label for="f-t1m">Tier 1: from qty</label><input id="f-t1m" name="t1min" type="number" inputmode="numeric" value="${esc(t1.min ?? '')}"></div>
+      <div class="field"><label for="f-t1p">Tier 1 price</label><input id="f-t1p" name="t1price" type="number" inputmode="decimal" step="0.01" value="${esc(t1.price ?? '')}"></div></div>
+    <div class="g2"><div class="field"><label for="f-t2m">Tier 2: from qty</label><input id="f-t2m" name="t2min" type="number" inputmode="numeric" value="${esc(t2.min ?? '')}"></div>
+      <div class="field"><label for="f-t2p">Tier 2 price</label><input id="f-t2p" name="t2price" type="number" inputmode="decimal" step="0.01" value="${esc(t2.price ?? '')}"></div></div>
+    <div class="hint">Each tier must start above the previous quantity and cost less per unit.</div>
+    <div class="g2"><div class="field"><label for="f-origin">Origin (place)</label><input id="f-origin" name="origin" value="${esc(p.origin)}"></div>
+      <div class="field"><label for="f-emoji">Icon (one emoji)</label><input id="f-emoji" name="emoji" value="${esc(p.emoji)}" maxlength="4"></div></div>
+    <div class="field"><label for="f-desc">Description</label><textarea id="f-desc" name="desc">${esc(p.desc)}</textarea></div>
+    <button class="btn primary block">Save listing</button></form>`;
+}
+function saveProduct(fd) {
+  const g = k => String(fd.get(k) || '').trim(), n = k => Number(g(k));
+  const name = g('name'), price = n('price'), moq = n('moq'), stock = n('stock');
+  if (name.length < 3) return toast('Enter a product name');
+  if (!(price > 0)) return toast('Price must be more than 0');
+  if (!(moq >= 1)) return toast('MOQ must be at least 1');
+  if (!(stock >= 0)) return toast('Stock cannot be negative');
+  const tiers = []; let prevMin = moq, prevPrice = price;
+  for (const i of [1, 2]) {
+    if (!g('t' + i + 'min') && !g('t' + i + 'price')) continue;
+    const m = n('t' + i + 'min'), pr = n('t' + i + 'price');
+    if (!(m > prevMin) || !(pr > 0) || !(pr < prevPrice)) return toast('Tier ' + i + ': quantity must be higher and price lower than the step before');
+    tiers.push({ min:m, price:pr }); prevMin = m; prevPrice = pr;
+  }
+  const data = { name, category:g('category'), unit:g('unit'), price, moq, stock, gst:n('gst'), tiers, origin:g('origin'), desc:g('desc'), emoji:g('emoji') || '\uD83D\uDCE6' };
+  const id = g('id');
+  if (id && P(id)) Object.assign(P(id), data);
+  else db.products.unshift({ id:'p' + (++db.seq.p), vendorId:db.session, ...data });
+  save(); closeSheet(); render(); toast('Listing saved');
+}
+
+/* ---------- Admin: GSTIN verification (manual) ---------- */
+function verifyHTML() {
+  const people = db.users.filter(x => x.role !== 'admin');
+  const pending = people.filter(x => x.gstinStatus === 'pending');
+  const card = x => `<article class="panel"><div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(x.business)}</b>${gstinBadge(x)}</div>
+    <div class="sub">${roleLabel(x.role)}: ${esc(x.name)}${x.city ? ', ' + esc(x.city) : ''}</div>
+    <div style="margin-top:6px;font-weight:700;letter-spacing:.03em">${esc(x.gstin || 'No GSTIN')}</div>
+    ${x.gstin ? `<div class="sub">${GSTIN_RE.test(x.gstin) ? 'Format valid. State: ' + esc(STATE_CODES[x.gstin.slice(0, 2)] || 'unknown code') : 'Format invalid'}</div>` : ''}
+    ${x.gstinNote ? `<div class="sub">Note: ${esc(x.gstinNote)}</div>` : ''}
+    ${x.gstinStatus === 'pending' ? `<div class="row"><a class="btn sm" href="https://services.gst.gov.in/services/searchtp" target="_blank" rel="noopener">Open GST portal</a>
+      <button class="btn sm primary" data-act="gst-approve" data-id="${x.id}">Approve</button><button class="btn sm danger" data-act="gst-reject" data-id="${x.id}">Reject</button></div>` : ''}</article>`;
+  return `<h1>GSTIN verification</h1>
+    <div class="notice info">Format is checked automatically. "Verified" means you searched the number on the GST portal (Search Taxpayer) and the name matches.</div>
+    <h2 style="margin-top:14px">Waiting for review (${pending.length})</h2>
+    ${pending.length ? pending.map(card).join('') : '<div class="empty"><p class="sub">Nothing to review right now.</p></div>'}
+    <h2 style="margin-top:14px">All accounts</h2>${people.map(card).join('')}`;
+}
+
+/* ---------- Profile ---------- */
+function profileHTML(u) {
+  const showG = u.role !== 'admin';
+  return `<h1>Profile</h1>
+    <form class="panel" data-form="profile">
+      <div class="field"><label for="p-name">Your name</label><input id="p-name" name="name" value="${esc(u.name)}" required></div>
+      <div class="field"><label for="p-biz">Business name</label><input id="p-biz" name="business" value="${esc(u.business)}" required></div>
+      <div class="g2"><div class="field"><label for="p-phone">WhatsApp number</label><input id="p-phone" name="phone" type="tel" inputmode="tel" value="${esc(u.phone)}" placeholder="10 digits"></div>
+        <div class="field"><label for="p-city">City</label><input id="p-city" name="city" value="${esc(u.city)}"></div></div>
+      ${showG ? `<div class="field"><label for="p-gst">GSTIN</label><input id="p-gst" name="gstin" maxlength="15" autocapitalize="characters" value="${esc(u.gstin)}">
+        <div style="margin-top:6px">${gstinBadge(u)}</div>
+        ${u.gstinNote ? `<div class="hint">Admin note: ${esc(u.gstinNote)}</div>` : ''}
+        <div class="hint">Changing the number sends it for review again.</div></div>` : ''}
+      <button class="btn primary block">Save profile</button>
+    </form>
+    <div class="panel"><h2>Your data</h2>
+      <p class="sub">This demo keeps data only in this browser. Export a backup before clearing browser data.</p>
+      <div class="row"><button class="btn sm" data-act="export">Export backup</button><button class="btn sm" data-act="import">Import backup</button><button class="btn sm danger" data-act="reset">Reset demo data</button></div></div>
+    <button class="btn block" data-act="signout">Sign out</button>`;
+}
+
+/* =====================================================================
+   6. AI PIPELINE TOOLS
+   Har tool: (1) real local checks chalata hai, (2) result JSON deta hai,
+   (3) ek ready-to-paste "developer prompt" banata hai (system + user) jo aap
+   ChatGPT / Claude / Gemini me paste kar sakte hain. Koi paid API nahi.
+   ===================================================================== */
+const STOP = new Set('need want buy looking for the and with under below above about per from around approx price rate best good quality of to in a an at kg kgs pcs pc units unit ltr litre litres liters set sets box boxes rs inr up upto max min minimum required please supplier suppliers'.split(' '));
+const catalogForAI = () => db.products.filter(p => p.stock > 0).map(p => ({ product_id:p.id, name:p.name, category:p.category, unit:p.unit, price:p.price, moq:p.moq, stock:p.stock, tiers:p.tiers, supplier:(U(p.vendorId) || {}).business, gstin_status:(U(p.vendorId) || {}).gstinStatus }));
+const vendorOpts = () => db.users.filter(x => x.role === 'vendor').map(x => [x.id, x.business]);
+const productOpts = () => db.products.map(p => [p.id, p.name + ' (' + (U(p.vendorId) || {}).business + ')']);
+
+const WORKFLOWS = {
+  rfq: {
+    title:'RFQ smart match',
+    desc:'Paste a buyer request. The pipeline reads quantity and budget, then ranks live listings.',
+    fields:[{ k:'text', label:'Buyer request', type:'textarea', ph:'e.g. Need 300 kg Assam tea under \u20B9300 per kg' }],
+    defaults:() => ({ text:'Need 300 kg Assam tea under \u20B9300 per kg' }),
+    run(inp) {
+      const text = (inp.text || '').trim();
+      if (text.length < 5) return { error:'Type a buyer request first' };
+      const steps = [], t = text.replace(/(\d),(\d{3})/g, '$1$2');
+      const pm = t.match(/(?:\u20B9|rs\.?|inr)\s*(\d+(?:\.\d+)?)/i);
+      const maxPrice = pm ? Number(pm[1]) : null;
+      const rest = pm ? t.replace(pm[0], ' ') : t;
+      const qm = rest.match(/(\d+(?:\.\d+)?)\s*(kg|kgs|l|ltr|litres?|liters?|pcs?|pieces|units?|nos|sets?|box(?:es)?)\b/i);
+      const qty = qm ? Number(qm[1]) : null;
+      const kws = [...new Set(rest.toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !STOP.has(w)))];
+      steps.push({ n:'Parse request', d:`quantity: ${qty ?? 'not found'}, max price: ${maxPrice ? inr(maxPrice) : 'not found'}, keywords: ${kws.join(', ') || 'none'}` });
+      const stock = db.products.filter(p => p.stock > 0);
+      steps.push({ n:'Load catalog', d:stock.length + ' listings in stock' });
+      const scored = stock.map(p => {
+        const v = U(p.vendorId) || {}, name = p.name.toLowerCase(), other = [p.category, p.desc, p.origin, v.business].join(' ').toLowerCase();
+        let s = 0;
+        kws.forEach(k => { const st = k.length > 3 ? k.replace(/s$/, '') : k; if (name.includes(st)) s += 3; else if (other.includes(st)) s += 1; });
+        if (!s) return null;
+        const price = qty ? unitPrice(p, qty) : p.price;
+        const moqOk = qty ? qty >= p.moq : null, stockOk = qty ? qty <= p.stock : true, inBudget = maxPrice ? price <= maxPrice : null;
+        if (inBudget === true) s += 2; if (inBudget === false) s -= 1; if (moqOk === true) s += 1; if (!stockOk) s -= 2; if (v.gstinStatus === 'verified') s += 1;
+        return { p, v, s, price, moqOk, stockOk, inBudget };
+      }).filter(Boolean).sort((a, b) => b.s - a.s).slice(0, 3);
+      steps.push({ n:'Score listings', d:scored.length + ' match(es) after keyword, budget, MOQ and stock checks' });
+      steps.push({ n:'Check suppliers', d:scored.filter(m => m.v.gstinStatus === 'verified').length + ' of ' + scored.length + ' have a verified GSTIN' });
+      const result = { parsed:{ quantity:qty, max_unit_price:maxPrice, keywords:kws }, matches:scored.map(m => ({ product_id:m.p.id, name:m.p.name, supplier:m.v.business, unit_price:m.price, moq:m.p.moq, moq_ok:m.moqOk, within_budget:m.inBudget, stock_ok:m.stockOk, gstin_status:m.v.gstinStatus, score:m.s })) };
+      const summary = scored.length ? scored.map((m, i) => `${i + 1}. ${m.p.name}: ${inr(m.price)}/${m.p.unit} from ${m.v.business}${m.moqOk === false ? ' (below MOQ ' + m.p.moq + ')' : ''}${m.inBudget === false ? ' (over budget)' : ''}`) : ['No listing matched. Try simpler words like "tea" or "rice".'];
+      return { steps, result, summary,
+        system:`You are the RFQ matching engine of ${BRAND}, a wholesale marketplace in India.\nTask: read the buyer request and choose up to 3 products from CATALOG that fit best.\nRules:\n- Use only products in CATALOG. Never invent products, prices or suppliers.\n- Extract quantity, unit and maximum unit price from the request. Use null when missing.\n- Set moq_ok to false when the requested quantity is below the product MOQ.\n- Prefer suppliers whose gstin_status is "verified".\n- Reply with JSON only (no markdown) in this schema:\n{"parsed":{"quantity":number|null,"unit":string|null,"max_unit_price":number|null},"matches":[{"product_id":string,"reason":string,"moq_ok":boolean,"within_budget":boolean|null}]}`,
+        user:`BUYER REQUEST:\n${text}\n\nCATALOG:\n${JSON.stringify(catalogForAI())}` };
+    }
+  },
+  trust: {
+    title:'Supplier trust check',
+    desc:'Scores a supplier from GSTIN status, listings and order history on this platform.',
+    fields:[{ k:'vendor', label:'Supplier', type:'select', opts:vendorOpts }],
+    defaults:() => ({ vendor:(vendorOpts()[0] || [])[0] }),
+    run(inp) {
+      const v = U(inp.vendor); if (!v) return { error:'Choose a supplier' };
+      const listings = db.products.filter(p => p.vendorId === v.id), orders = db.orders.filter(o => o.vendorId === v.id);
+      const done = orders.filter(o => o.status === 'Delivered').length, cancelled = orders.filter(o => o.status === 'Cancelled').length;
+      const fmtOk = GSTIN_RE.test(v.gstin || '');
+      const checks = [
+        { name:'GSTIN format', max:20, got:fmtOk ? 20 : 0, detail:fmtOk ? 'valid, state ' + (STATE_CODES[v.gstin.slice(0, 2)] || 'unknown') : 'missing or invalid' },
+        { name:'GSTIN verified by admin', max:35, got:v.gstinStatus === 'verified' ? 35 : v.gstinStatus === 'pending' ? 10 : 0, detail:v.gstinStatus },
+        { name:'Active listings', max:15, got:Math.min(15, listings.length * 5), detail:listings.length + ' listing(s)' },
+        { name:'Stock available', max:10, got:listings.some(p => p.stock > 0) ? 10 : 0, detail:listings.some(p => p.stock > 0) ? 'in stock' : 'no stock' },
+        { name:'Order track record', max:20, got:(done + cancelled) ? Math.round(20 * done / (done + cancelled)) : 10, detail:(done + cancelled) ? done + ' delivered, ' + cancelled + ' cancelled' : 'no history yet (neutral)' }
+      ];
+      const score = checks.reduce((s, c) => s + c.got, 0);
+      const band = score >= 80 ? 'Low risk' : score >= 50 ? 'Medium risk' : 'High risk';
+      const steps = checks.map(c => ({ n:c.name, d:`${c.got}/${c.max} - ${c.detail}` }));
+      steps.push({ n:'Compute trust score', d:score + '/100 = ' + band });
+      const evidence = { supplier:v.business, city:v.city, gstin_status:v.gstinStatus, gstin_format_valid:fmtOk, listings:listings.length, delivered_orders:done, cancelled_orders:cancelled, rule_based_score:score };
+      return { steps, result:{ supplier:v.business, score, band, checks }, summary:[v.business + ': ' + score + '/100', band],
+        system:`You are a B2B supplier risk analyst for ${BRAND}.\nYou receive EVIDENCE as JSON. Write a short trust summary for a buyer.\nRules:\n- Use only facts in EVIDENCE. If something is not in EVIDENCE, say "unknown".\n- Never claim a GSTIN is genuine unless gstin_status is "verified".\n- Give: risk_level (low|medium|high), 3 reasons, 2 questions the buyer should ask before paying an advance.\n- Reply with JSON only: {"risk_level":string,"reasons":[string],"questions":[string]}`,
+        user:`EVIDENCE:\n${JSON.stringify(evidence, null, 2)}` };
+    }
+  },
+  landed: {
+    title:'Landed cost and duty',
+    desc:'Works out the real cost per unit with tier price, freight, duty and GST.',
+    fields:[
+      { k:'product', label:'Product', type:'select', opts:productOpts },
+      { k:'qty', label:'Quantity', type:'number', ph:'e.g. 500' },
+      { k:'freight', label:'Freight for the whole order (INR)', type:'number', ph:'e.g. 3500' },
+      { k:'duty', label:'Import duty (%), 0 for domestic', type:'number', ph:'0' }
+    ],
+    defaults:() => ({ product:(productOpts()[0] || [])[0], qty:'500', freight:'3500', duty:'0' }),
+    run(inp) {
+      const p = P(inp.product), qty = Number(inp.qty), freight = Number(inp.freight || 0), duty = Number(inp.duty || 0);
+      if (!p) return { error:'Choose a product' };
+      if (!(qty > 0)) return { error:'Enter a quantity' };
+      const unit = unitPrice(p, qty), goods = r2(unit * qty), dutyAmt = r2(goods * duty / 100);
+      const taxable = r2(goods + freight + dutyAmt), gst = r2(taxable * p.gst / 100), total = r2(taxable + gst);
+      const steps = [
+        { n:'Pick tier price', d:inr(unit) + ' per ' + p.unit + ' at ' + qty + ' ' + p.unit + (qty < p.moq ? ' (below MOQ ' + p.moq + ')' : '') },
+        { n:'Goods value', d:inr(goods) },
+        { n:'Add freight and duty', d:'freight ' + inr(freight) + ', duty ' + inr(dutyAmt) },
+        { n:'Add GST at ' + p.gst + '%', d:inr(gst) + ' on ' + inr(taxable) },
+        { n:'Per-unit landed cost', d:inr(r2(taxable / qty)) + ' before GST, ' + inr(r2(total / qty)) + ' with GST' }
+      ];
+      const result = { product:p.name, quantity:qty, unit_price:unit, goods_value:goods, freight, duty_percent:duty, duty_amount:dutyAmt, taxable_value:taxable, gst_percent:p.gst, gst_amount:gst, total, landed_per_unit_before_gst:r2(taxable / qty), landed_per_unit_with_gst:r2(total / qty) };
+      return { steps, result, summary:['Total ' + inr(total) + ' for ' + qty + ' ' + p.unit, inr(r2(taxable / qty)) + ' per ' + p.unit + ' before GST (claimable as input credit if you are GST-registered)'],
+        system:`You are a customs and landed-cost assistant for Indian wholesale buyers.\nGiven a product description, suggest up to 3 candidate 6-digit HS codes with a confidence from 0 to 1 and a one-line reason each.\nRules:\n- Do not state duty or GST rates as certain. Say they must be confirmed with a customs broker (CHA) or on ICEGATE.\n- If the description is too vague, ask one clarifying question instead of guessing.\n- Reply with JSON only: {"candidates":[{"hs_code":string,"confidence":number,"reason":string}],"clarifying_question":string|null}`,
+        user:`PRODUCT: ${p.name}\nCATEGORY: ${p.category}\nDESCRIPTION: ${p.desc}\nORIGIN: ${p.origin}\nQUANTITY: ${qty} ${p.unit}` };
+    }
+  },
+  listing: {
+    title:'Listing writer',
+    desc:'Turns rough notes into a clean product listing prompt for wholesale buyers.',
+    fields:[
+      { k:'raw', label:'Rough product notes', type:'textarea', ph:'e.g. dry ginger 25kg bag, sun dried, from Karbi Anglong, moq 50kg' },
+      { k:'lang', label:'Write the listing in', type:'select', opts:() => [['English','English'],['Hindi','Hindi'],['Assamese','Assamese']] }
+    ],
+    defaults:() => ({ raw:'dry ginger 25kg bag, sun dried, from Karbi Anglong, moq 50kg', lang:'English' }),
+    run(inp) {
+      const raw = (inp.raw || '').replace(/\s+/g, ' ').trim();
+      if (raw.length < 10) return { error:'Add a few more details about the product' };
+      const KEY = { 'Tea & Beverages':['tea','coffee','juice'], 'Grains & Staples':['rice','wheat','dal','oil','flour','atta','sugar'], 'Spices':['turmeric','ginger','pepper','chilli','spice','cardamom'], 'Handicrafts':['bamboo','cane','handmade','handwoven','gamosa','craft'], 'Textiles':['cotton','fabric','hoodie','shirt','saree','silk','garment'], 'Electronics':['bluetooth','earbud','charger','led','battery','cable'] };
+      const low = raw.toLowerCase();
+      const counts = Object.keys(KEY).map(c => [c, KEY[c].filter(w => low.includes(w)).length]).sort((a, b) => b[1] - a[1]);
+      const cat = counts[0][1] ? counts[0][0] : 'Unknown';
+      const specs = raw.match(/\d+(?:\.\d+)?\s?(?:kg|g|gm|ml|l|mm|cm|gsm|w|mah|pcs|pc)\b/gi) || [];
+      const lang = inp.lang || 'English';
+      const steps = [
+        { n:'Clean notes', d:raw.length + ' characters' },
+        { n:'Guess category', d:cat },
+        { n:'Find sizes and weights', d:specs.join(', ') || 'none found' },
+        { n:'Build prompt', d:'JSON listing in ' + lang }
+      ];
+      return { steps, result:{ category_guess:cat, specs_found:specs, language:lang }, summary:['Category guess: ' + cat, 'Specs found: ' + (specs.join(', ') || 'none')],
+        system:`You write product listings for ${BRAND}, a B2B wholesale marketplace in India. Buyers are shop owners and traders.\nRules:\n- Use only facts in the seller's notes. Never invent certifications, origin, weights or claims.\n- Put quantity, packing and MOQ details first. Keep it plain and specific.\n- Write in ${lang}.\n- Reply with JSON only: {"title":string,"short_description":string,"bullets":[string],"category":string,"search_keywords":[string]}\n- category must be one of: ${CATEGORIES.join(', ')}.`,
+        user:`SELLER NOTES:\n${raw}` };
+    }
+  }
+};
+
+function aiHTML() {
+  const wf = WORKFLOWS[ui.aiWf], vals = ui.aiInputs[ui.aiWf] || wf.defaults();
+  const chips = Object.keys(WORKFLOWS).map(k => `<button class="chip${ui.aiWf === k ? ' on' : ''}" data-act="ai-wf" data-v="${k}">${esc(WORKFLOWS[k].title)}</button>`).join('');
+  const fields = wf.fields.map(f => {
+    const val = vals[f.k] ?? '';
+    const ctl = f.type === 'textarea' ? `<textarea id="ai-${f.k}" name="${f.k}" placeholder="${esc(f.ph || '')}">${esc(val)}</textarea>`
+      : f.type === 'select' ? `<select id="ai-${f.k}" name="${f.k}">${f.opts().map(o => `<option value="${esc(o[0])}"${String(o[0]) === String(val) ? ' selected' : ''}>${esc(o[1])}</option>`).join('')}</select>`
+      : `<input id="ai-${f.k}" name="${f.k}" type="number" inputmode="decimal" placeholder="${esc(f.ph || '')}" value="${esc(val)}">`;
+    return `<div class="field"><label for="ai-${f.k}">${esc(f.label)}</label>${ctl}</div>`;
+  }).join('');
+  return `<h1>AI tools</h1>
+    <p class="sub">Each tool runs real checks on this app's data, then writes a prompt you can paste into any AI chat. No paid API needed.</p>
+    <div class="chips" role="group" aria-label="AI tools">${chips}</div>
+    <form class="panel" data-form="ai"><h2>${esc(wf.title)}</h2><p class="sub">${esc(wf.desc)}</p>${fields}
+      <button class="btn primary block" ${ui.aiBusy ? 'disabled' : ''}>${ui.aiBusy ? 'Running...' : 'Run pipeline'}</button></form>
+    ${aiOutHTML()}`;
+}
+function aiOutHTML() {
+  const o = ui.aiOut; if (!o || o.wf !== ui.aiWf) return '';
+  const log = o.steps.slice(0, o.shown).map(s => `<li><span class="ok">&#10003;</span><b>${esc(s.n)}</b><small>${esc(s.d)}</small></li>`).join('');
+  let done = '';
+  if (o.done) {
+    done = `<div class="verdict">${o.summary.map(l => `<p>${esc(l)}</p>`).join('')}</div>
+      <h3>Result (JSON)</h3><pre id="p-json">${esc(JSON.stringify(o.result, null, 2))}</pre>
+      <h3 style="margin-top:12px">Prompt for an AI chat</h3>
+      <div class="lbl">System prompt</div><pre id="p-sys">${esc(o.system)}</pre>
+      <div class="lbl">User prompt</div><pre id="p-usr">${esc(o.user)}</pre>
+      <div class="row"><button class="btn sm" data-act="copy" data-t="p-sys">Copy system</button><button class="btn sm" data-act="copy" data-t="p-usr">Copy user</button><button class="btn sm dark" data-act="copy-both">Copy both</button></div>`;
+  }
+  return `<section id="airesult" class="panel"><h2>Pipeline log</h2><ol id="ailog" class="log">${log}</ol>${done}</section>`;
+}
+async function runAI(fd) {
+  if (ui.aiBusy) return;
+  const wf = WORKFLOWS[ui.aiWf], inp = {};
+  wf.fields.forEach(f => { inp[f.k] = String(fd.get(f.k) ?? ''); });
+  ui.aiInputs[ui.aiWf] = inp;
+  const out = wf.run(inp);
+  if (out.error) return toast(out.error);
+  ui.aiBusy = true; ui.aiOut = { wf:ui.aiWf, ...out, shown:0, done:false };
+  render();
+  const key = ui.aiWf;
+  for (let i = 0; i < out.steps.length; i++) {
+    await sleep(260);
+    if (!ui.aiOut || ui.aiOut.wf !== key) break;
+    ui.aiOut.shown = i + 1;
+    const el = $('#ailog');
+    if (el) el.innerHTML = aiLogHTML();
+  }
+  ui.aiBusy = false;
+  if (ui.aiOut && ui.aiOut.wf === key) { ui.aiOut.shown = out.steps.length; ui.aiOut.done = true; }
+  if (ui.tab === 'ai') { render(); const r = $('#airesult'); if (r) r.scrollIntoView(); }
+}
+function aiLogHTML() { return ui.aiOut.steps.slice(0, ui.aiOut.shown).map(s => `<li><span class="ok">&#10003;</span><b>${esc(s.n)}</b><small>${esc(s.d)}</small></li>`).join(''); }
+async function copyText(text) {
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+    ta.remove();
+  }
+  toast(ok ? 'Copied' : 'Could not copy. Long-press the text to copy it.');
+}
+
+/* =====================================================================
+   7. SHEET, DOWNLOAD, EVENTS
+   ===================================================================== */
+function openSheet(title, html) {
+  $('#sheet-title').textContent = title; $('#sheet-body').innerHTML = html;
+  $('#sheetwrap').classList.add('open'); document.body.style.overflow = 'hidden';
+  $('#sheet').scrollTop = 0; $('#sheet-close').focus();
+}
+function closeSheet() { $('#sheetwrap').classList.remove('open'); document.body.style.overflow = ''; }
+function download(name, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type:'application/json' })); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function login(id) { db.session = id; ui.tab = TABS[U(id).role][0].id; save(); render(); window.scrollTo(0, 0); }
+function go(tab) { ui.tab = tab; render(); window.scrollTo(0, 0); }
+
+const ACTIONS = {
+  backdrop:(el, e) => { if (e.target === el) closeSheet(); },
+  'close-sheet':() => closeSheet(),
+  tab:el => go(el.dataset.tab),
+  'goto-orders':() => { closeSheet(); go('orders'); },
+  demo:el => login(el.dataset.id),
+  signout:() => { db.session = null; save(); render(); window.scrollTo(0, 0); },
+  cat:el => { ui.cat = el.dataset.v; render(); },
+  ofilter:el => { ui.ofilter = el.dataset.v; render(); },
+  'open-product':el => openProduct(el.dataset.id),
+  dstep:el => {
+    const inp = $('#dqty'), p = P(inp.dataset.pid), cur = Math.floor(Number(inp.value)) || p.moq;
+    inp.value = Math.max(1, cur + Number(el.dataset.d) * stepFor(p)); updateDTotal();
+  },
+  'add-cart':el => { const inp = $('#dqty'); const qty = Math.floor(Number(inp.value)); if (!(qty >= 1)) return toast('Enter a quantity'); addToCart(el.dataset.id, qty); },
+  'rfq-wa':el => {
+    const p = P(el.dataset.id), v = U(p.vendorId), u = me(), qty = Math.floor(Number($('#dqty').value)) || p.moq;
+    window.open(waLink(v.phone, `Hello ${v.business}, I found "${p.name}" on ${BRAND}. Please share your best price for ${qty} ${p.unit}.\nDeliver to: ${u.city || '-'}\n${u.business || u.name}`), '_blank', 'noopener');
+  },
+  'cart-step':el => {
+    const l = cart().find(x => x.productId === el.dataset.pid), p = P(el.dataset.pid);
+    l.qty = Math.max(1, l.qty + Number(el.dataset.d) * stepFor(p)); save(); render();
+  },
+  'cart-remove':el => { db.carts[db.session] = cart().filter(x => x.productId !== el.dataset.pid); save(); render(); },
+  'place-order':() => placeOrders(),
+  'order-status':el => {
+    if (el.dataset.s === 'Cancelled' && !confirm('Cancel this order? Stock will be returned to the seller.')) return;
+    setStatus(el.dataset.id, el.dataset.s);
+  },
+  'order-wa':el => {
+    const o = db.orders.find(x => x.id === el.dataset.id), u = me(), b = U(o.buyerId), v = U(o.vendorId);
+    const link = u.role === 'vendor'
+      ? waLink(b.phone, `Hello ${b.business || b.name}, this is ${v.business}. Update on order ${o.id}: status is ${o.status}. Total ${inr(o.total)}.`)
+      : waLink(v.phone, orderMsg(o));
+    window.open(link, '_blank', 'noopener');
+  },
+  'new-product':() => openSheet('Add a product', productFormHTML()),
+  'edit-product':el => openSheet('Edit product', productFormHTML(P(el.dataset.id))),
+  'delete-product':el => { if (confirm('Delete this listing? Past orders keep their saved details.')) { db.products = db.products.filter(p => p.id !== el.dataset.id); save(); render(); toast('Listing deleted'); } },
+  'gst-approve':el => { const x = U(el.dataset.id); x.gstinStatus = 'verified'; x.gstinNote = ''; save(); render(); toast(x.business + ' verified'); },
+  'gst-reject':el => openSheet('Reject GSTIN', `<form data-form="reject"><input type="hidden" name="id" value="${esc(el.dataset.id)}">
+    <div class="field"><label for="rj">Reason (the user will see this)</label><textarea id="rj" name="reason" required placeholder="e.g. Name on GST portal does not match"></textarea></div>
+    <button class="btn danger block">Reject GSTIN</button></form>`),
+  'ai-wf':el => { ui.aiWf = el.dataset.v; render(); },
+  copy:el => { const t = $('#' + el.dataset.t); if (t) copyText(t.textContent); },
+  'copy-both':() => copyText($('#p-sys').textContent + '\n\n---\n\n' + $('#p-usr').textContent),
+  export:() => { download('thokmandi-backup.json', JSON.stringify(db, null, 2)); toast('Backup downloaded'); },
+  import:() => $('#importfile').click(),
+  reset:() => { if (confirm('Reset all demo data? This deletes accounts, listings and orders in this browser.')) { try { localStorage.removeItem(DB_KEY); } catch (e) {} db = seed(); ui.tab = 'market'; ui.aiOut = null; render(); toast('Demo data restored'); } }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const h = ACTIONS[el.dataset.act]; if (h) h(el, e);
+});
+
+const FORMS = {
+  register:fd => {
+    const g = k => String(fd.get(k) || '').trim();
+    const phone = g('phone').replace(/\D/g, ''), gstin = g('gstin').toUpperCase().replace(/\s/g, '');
+    if (phone && !/^\d{10,13}$/.test(phone)) return toast('Enter a 10-digit WhatsApp number');
+    if (gstin && !GSTIN_RE.test(gstin)) return toast('GSTIN format looks wrong. It has 15 characters, like 18ABCDE1234F1Z5');
+    const id = 'u' + (++db.seq.u);
+    db.users.push({ id, role:g('role') === 'vendor' ? 'vendor' : 'buyer', name:g('name'), business:g('business'), phone, city:g('city'), gstin, gstinStatus:gstin ? 'pending' : 'none', gstinNote:'' });
+    login(id); toast('Welcome to ' + BRAND);
+  },
+  profile:fd => {
+    const u = me(), g = k => String(fd.get(k) || '').trim();
+    const phone = g('phone').replace(/\D/g, ''), gstin = g('gstin').toUpperCase().replace(/\s/g, '');
+    if (phone && !/^\d{10,13}$/.test(phone)) return toast('Enter a 10-digit WhatsApp number');
+    if (gstin && !GSTIN_RE.test(gstin)) return toast('GSTIN format looks wrong. It has 15 characters, like 18ABCDE1234F1Z5');
+    Object.assign(u, { name:g('name'), business:g('business'), phone, city:g('city') });
+    if (u.role !== 'admin' && gstin !== u.gstin) { u.gstin = gstin; u.gstinStatus = gstin ? 'pending' : 'none'; u.gstinNote = ''; }
+    save(); render(); toast('Profile saved');
+  },
+  product:fd => saveProduct(fd),
+  reject:fd => { const x = U(fd.get('id')); x.gstinStatus = 'rejected'; x.gstinNote = String(fd.get('reason') || '').trim(); save(); closeSheet(); render(); toast('GSTIN rejected'); },
+  ai:fd => runAI(fd)
+};
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]'); if (!f) return;
+  e.preventDefault(); const h = FORMS[f.dataset.form]; if (h) h(new FormData(f), f);
+});
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { ui.q = e.target.value; const l = $('#plist'); if (l) l.innerHTML = productListHTML(); }
+  else if (e.target.id === 'dqty') updateDTotal();
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'sort') { ui.sort = t.value; $('#plist').innerHTML = productListHTML(); }
+  else if (t.dataset && t.dataset.cartqty) {
+    const l = cart().find(x => x.productId === t.dataset.cartqty), q = Math.floor(Number(t.value));
+    if (l) { l.qty = q >= 1 ? q : 1; save(); render(); }
+  } else if (t.id === 'importfile' && t.files[0]) {
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        const d = JSON.parse(rd.result);
+        if (!d || d.v !== DB_VERSION || !Array.isArray(d.users) || !Array.isArray(d.products) || !Array.isArray(d.orders)) throw new Error('bad file');
+        db = d; save(); render(); toast('Backup restored');
+      } catch (err) { toast('That file is not a valid ' + BRAND + ' backup'); }
+      t.value = '';
+    };
+    rd.readAsText(t.files[0]);
+  }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#sheetwrap').classList.contains('open')) closeSheet(); });
+
+render();
+</script>
+</body>
+</html>
